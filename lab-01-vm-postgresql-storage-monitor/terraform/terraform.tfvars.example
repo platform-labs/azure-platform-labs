@@ -1,0 +1,5 @@
+﻿project_name = "csnp-lab"
+location = "eastus"
+db_password = "ChangeMe123!ChangeMe123!"
+ssh_public_key = "ssh-rsa REPLACE_WITH_YOUR_PUBLIC_KEY"
+

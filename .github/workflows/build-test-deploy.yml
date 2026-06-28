@@ -1,0 +1,79 @@
+﻿name: wallet-api-ci-cd
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  AZURE_CONTAINER_APP: ${{ vars.AZURE_CONTAINER_APP }}
+  ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+  ACR_REPOSITORY: ${{ vars.ACR_REPOSITORY }}
+  APP_DIR: lab-02-acr-container-apps/src/Lab02.WalletMinimal
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        working-directory: ${{ env.APP_DIR }}
+        run: dotnet restore Lab02.WalletMinimal.sln
+      - name: Build
+        working-directory: ${{ env.APP_DIR }}
+        run: dotnet build Lab02.WalletMinimal.sln --configuration Release --no-restore
+      - name: Test
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          test_projects=$(find . -name '*Tests.csproj' -o -name '*Test.csproj')
+          if [ -z "$test_projects" ]; then
+            echo "No test projects found; build verification completed."
+          else
+            dotnet test $test_projects --configuration Release --no-build --no-restore
+          fi
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build-test
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Login to ACR
+        run: az acr login --name "${ACR_LOGIN_SERVER%%.azurecr.io}"
+      - name: Build and push immutable image
+        id: build-image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: ${{ env.APP_DIR }}
+        run: |
+          image="$ACR_LOGIN_SERVER/$ACR_REPOSITORY:$IMAGE_TAG"
+          docker build -t "$image" .
+          docker push "$image"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+      - name: Deploy and wait for stability
+        run: |
+          az containerapp update \
+            --name "$AZURE_CONTAINER_APP" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --image "${{ steps.build-image.outputs.image }}"
+          az containerapp revision list \
+            --name "$AZURE_CONTAINER_APP" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --query "[?properties.active].{name:name,traffic:properties.trafficWeight,created:properties.createdTime}" \
+            --output table
+

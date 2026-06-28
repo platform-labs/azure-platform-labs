@@ -1,0 +1,5 @@
+﻿project_name = "csnp-lab"
+location = "eastus"
+domain_name = "csnp.example.com"
+container_app_fqdn = "replace.azurecontainerapps.io"
+

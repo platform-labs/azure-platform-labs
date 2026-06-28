@@ -1,0 +1,5 @@
+﻿location = "eastus"
+resource_group_name = "csnp-labs-tfstate-rg"
+storage_account_name = "csnplabstfstate"
+container_name = "tfstate"
+

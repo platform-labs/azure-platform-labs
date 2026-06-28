@@ -1,0 +1,17 @@
+﻿{
+  "resourceGroup": "csnp-lab08-rg",
+  "containerAppName": "csnp-wallet-api",
+  "acrLoginServer": "csnpregistry.azurecr.io",
+  "repository": "csnp-platform-wallet-api",
+  "imageTag": "REPLACE_WITH_GITHUB_SHA",
+  "containerPort": 5000,
+  "env": {
+    "ASPNETCORE_URLS": "http://+:5000",
+    "DB_HOST": "csnp-postgres.postgres.database.azure.com",
+    "DB_PORT": "5432",
+    "DB_NAME": "wallet",
+    "BLOB_CONTAINER": "wallet-uploads"
+  },
+  "deployCommand": "az containerapp update --resource-group csnp-lab08-rg --name csnp-wallet-api --image csnpregistry.azurecr.io/csnp-platform-wallet-api:REPLACE_WITH_GITHUB_SHA"
+}
+

@@ -1,0 +1,4 @@
+﻿project_name = "csnp-lab"
+location = "eastus"
+db_password = "ChangeMe123!ChangeMe123!"
+

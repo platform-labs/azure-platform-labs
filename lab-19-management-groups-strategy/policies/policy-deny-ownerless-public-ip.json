@@ -1,0 +1,30 @@
+﻿{
+  "properties": {
+    "displayName": "Deny public IPs without owner tag",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "description": "Example Azure Policy guardrail for lab governance practice.",
+    "metadata": {
+      "category": "Network"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/publicIPAddresses"
+          },
+          {
+            "field": "tags['Owner']",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}
+

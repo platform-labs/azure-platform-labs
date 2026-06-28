@@ -1,0 +1,18 @@
+﻿# Lab 10 - Interview Notes
+
+## Managed node group quản lý gì?
+
+Azure quản lý lifecycle integration và rolling update của node pool/VMSS, nhưng team vẫn sở hữu Kubernetes version compatibility, capacity, daemonsets và workload disruption.
+
+## Control plane public endpoint có nghĩa node public?
+
+Không. API endpoint exposure và node subnet/public IP là hai quyết định khác nhau. Lab đặt nodes ở private subnets và giới hạn public API CIDR.
+
+## HPA cần gì?
+
+Metrics source, resource requests và workload có thể scale ngang. HPA không thay Cluster Autoscaler/Karpenter; nếu node hết capacity, pod vẫn Pending.
+
+## Ingress tự tạo Azure Load Balancer không?
+
+Chỉ khi ingress/controller tương ứng đang chạy với Microsoft Entra ID / Azure RBAC permissions đúng. Ingress resource tự nó không điều khiển Azure API.
+

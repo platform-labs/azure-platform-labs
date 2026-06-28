@@ -1,0 +1,42 @@
+﻿{
+  "properties": {
+    "displayName": "Allowed Azure locations",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "description": "Example Azure Policy guardrail that restricts resource deployment locations.",
+    "metadata": {
+      "category": "General"
+    },
+    "parameters": {
+      "allowedLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed locations",
+          "description": "Azure regions where resources may be deployed."
+        },
+        "defaultValue": [
+          "eastus",
+          "southeastasia"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "location",
+            "notIn": "[parameters('allowedLocations')]"
+          },
+          {
+            "field": "location",
+            "notEquals": "global"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}
+
